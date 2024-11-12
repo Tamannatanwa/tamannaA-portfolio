@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { FaGithub, FaLinkedinIn, FaTwitter } from 'react-icons/fa';
@@ -7,18 +6,53 @@ import Image from 'next/image';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('about');
-  
+  const [currentTitle, setCurrentTitle] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const titles = [
+    'React Developer',
+    'Web Developer',
+    'Full Stack Developer',
+    'Backend Developer',
+    'Software Engineer', // Additional title
+    'UI/UX Developer',   // Additional title
+  ];
+
+  const currentTitleWords = titles[currentTitle].split(' ');
+
+  useEffect(() => {
+    const typingInterval = setInterval(() => {
+      if (!isDeleting) {
+        if (currentWordIndex < currentTitleWords.length) {
+          setCurrentWordIndex((prevIndex) => prevIndex + 1);
+        } else {
+          setIsDeleting(true);
+        }
+      } else {
+        if (currentWordIndex > 0) {
+          setCurrentWordIndex((prevIndex) => prevIndex - 1);
+        } else {
+          setIsDeleting(false);
+          setCurrentTitle((prevTitle) => (prevTitle + 1) % titles.length);
+        }
+      }
+    }, 300); // Adjust the typing speed (in ms)
+
+    return () => clearInterval(typingInterval); // Clear interval on unmount
+  }, [currentWordIndex, isDeleting, currentTitleWords]);
+
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['about', 'skills', 'projects', 'contact'];
       const scrollPosition = window.scrollY;
-      
+
       sections.forEach(section => {
         const element = document.getElementById(section);
         if (element) {
           const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop - 100 && 
-              scrollPosition < offsetTop + offsetHeight - 100) {
+          if (scrollPosition >= offsetTop - 100 &&
+            scrollPosition < offsetTop + offsetHeight - 100) {
             setActiveSection(section);
           }
         }
@@ -40,6 +74,7 @@ export default function Home() {
       });
     }
   };
+
 
   return (
     <main className="bg-slate-900 min-h-screen text-white">
@@ -118,6 +153,9 @@ export default function Home() {
             <h1 className="text-5xl font-bold mb-4">
               Hello, I&apos;m{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400"> Tamanna</span>
+              <p className="text-xl text-gray-400 mb-6">
+              {currentTitleWords.slice(0, currentWordIndex).join(' ')}
+            </p>
             </h1>
             <p className="text-xl text-gray-400 mb-6">
               Full Stack Developer passionate about creating interactive applications
@@ -135,6 +173,7 @@ export default function Home() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="px-6 py-3 border border-blue-500 rounded-lg font-medium hover:bg-blue-500/10 transition-colors"
+                onClick={handleDownloadCV}
               >
                 Download CV
               </motion.button>
@@ -154,7 +193,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl" />
             <div className="relative h-full flex items-center justify-center">
               <Image 
-                src="/placeholder-image.jpg"
+                src="/myImage/aboutSec.png"
                 alt="Profile"
                 width={300}
                 height={300}
@@ -300,6 +339,12 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+      <footer className="w-full">
+        <AnimatedFooterGrid />
+        <div className="text-center py-4">
+          <p className="text-gray-400">© {new Date().getFullYear()} Tamanna Tanwar. All rights reserved.</p>
+        </div>
+      </footer>
     </main>
   );
 }
